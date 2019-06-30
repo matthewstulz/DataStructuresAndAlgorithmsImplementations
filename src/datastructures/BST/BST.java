@@ -6,6 +6,7 @@ import java.util.Queue;
 public class BST {
 
     private TreeNode root;
+    private TreeNode treeNodeParent;
 
     public BST() {
         root = null;
@@ -54,14 +55,15 @@ public class BST {
 
     private TreeNode searchRecursive(TreeNode root, int key) {
         if (root == null || root.getKey() == key) return root;
+        treeNodeParent = root;
         if (key < root.getKey()) {
             return searchRecursive(root.left, key);
         }
         return searchRecursive(root.right, key);
     }
 
-    public boolean searchIterative(int key) {
-        if (root == null) return false;
+    public TreeNode searchIterative(int key) {
+        if (root == null) return null;
         TreeNode current = root;
         while (current.getKey() != key) {
             if (key < current.getKey()) {
@@ -69,16 +71,15 @@ public class BST {
             } else {
                 current = current.right;
             }
-            if (current == null) return false;
+            if (current == null) return null;
         }
-        return true;
+        return current;
     }
 
     public void inOrderTraversal() { inOrderTraversal(root); }
     public void preOrderTraversal() { preOrderTraversal(root); }
     public void postOrderTraversal() { postOrderTraversal(root); }
     public void printLevelOrder() { printLevelOrder(root); }
-
 
     private void inOrderTraversal(TreeNode root) {
         if (root != null) {
@@ -112,7 +113,6 @@ public class BST {
             int size = queue.size();
             for (int i = 0; i < size; i++) {
                 TreeNode current = queue.poll();
-                assert current != null;
                 System.out.print(current.getKey() + " ");
                 if (current.left != null)
                     queue.add(current.left);
@@ -124,10 +124,53 @@ public class BST {
     }
 
     /*
-    Remove process
+    Remove process (Hibbard's deletion)
     1. Find the node that we wish to remove (temp)
-    2. Find the successor node (node int he right subtree that has the minimum value
+    2. Find the successor node (node in the right subtree that has the minimum value
     3. Replace the content of temp of that with the successor node
     4. Delete the successor node
      */
+    public void remove(int key) {
+        TreeNode temp, parent = root, successor;
+        temp = searchRecursive(key);
+        if (temp == null) return;
+        /* Hibbard's deletion */
+        // The node has no children
+        if (temp.left == null && temp.right == null) {
+            if (temp == root) root = null;
+            parent = treeNodeParent;
+            if (parent.left == temp) parent.left = null;
+            else parent.right = null;
+        }
+        // The node has one child
+        else if (temp.right == null) {
+            if (temp == root) root = null;
+            parent = treeNodeParent;
+            if (parent.left == temp) parent.left = temp.left;
+            else parent.right = temp.left;
+        }
+        else if (temp.left == null) {
+            if (temp == root) root = null;
+            parent = treeNodeParent;
+            if (parent.left == temp) parent.left = temp.right;
+            else parent.right = temp.right;
+        }
+        // The node has 2 children
+        else {
+            // The right node of temp is the successor
+            if (temp.right.left == null) {
+                temp.setKey(temp.right.getKey());
+                temp.right = temp.right.right;
+            } else {
+                successor = temp.right;
+                TreeNode successorParent = temp;
+                while (successor.left != null) {
+                    successorParent = successor;
+                    successor = successor.left;
+                }
+                temp.setKey(successor.getKey());
+                successorParent.left = successor.right;
+            }
+        }
+    }
 }
