@@ -64,8 +64,9 @@ public class BST {
 
     public TreeNode searchIterative(int key) {
         if (root == null) return null;
-        TreeNode current = root;
+        TreeNode current = treeNodeParent= root;
         while (current.getKey() != key) {
+            treeNodeParent = current;
             if (key < current.getKey()) {
                 current = current.left;
             } else {
@@ -126,12 +127,12 @@ public class BST {
     /*
     Remove process (Hibbard's deletion)
     1. Find the node that we wish to remove (temp)
-    2. Find the successor node (node in the right subtree that has the minimum value
+    2. Find the successor node (node in the right subtree that has the minimum value)
     3. Replace the content of temp of that with the successor node
-    4. Delete the successor node
+    4. Delete the successor node and point successor's parent's left child to successor's right child to realign tree.
      */
     public void remove(int key) {
-        TreeNode temp, parent = root, successor;
+        TreeNode temp, parent, successor;
         temp = searchRecursive(key);
         if (temp == null) return;
         /* Hibbard's deletion */
